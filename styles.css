@@ -34,6 +34,12 @@ body {
   overflow-x: hidden;
 }
 
+button,
+.ingredient {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .sprite {
   position: absolute;
   width: 0;
@@ -42,7 +48,7 @@ body {
 }
 
 .scene {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   gap: 22px;
   align-content: center;
@@ -1598,8 +1604,15 @@ h1 {
 }
 
 @media (max-width: 900px) {
+  .scene {
+    gap: 18px;
+    padding: 22px 14px 20px;
+    align-content: start;
+  }
+
   .studio-layout {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .broadcast-panel {
@@ -1608,6 +1621,7 @@ h1 {
 
   .machine-area {
     order: 1;
+    width: 100%;
   }
 
   .notes {
@@ -1615,13 +1629,174 @@ h1 {
   }
 
   .machine {
-    aspect-ratio: 9 / 16;
+    width: min(100%, 520px);
+    aspect-ratio: 4 / 7;
   }
 }
 
 @media (max-width: 640px) {
   .scene {
-    padding-inline: 12px;
+    gap: 16px;
+    padding: 18px 12px 18px;
+  }
+
+  .intro {
+    gap: 8px;
+  }
+
+  .eyebrow {
+    padding: 6px 11px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  h1 {
+    font-size: clamp(28px, 9vw, 42px);
+    line-height: 0.98;
+  }
+
+  .desc {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .studio-layout {
+    gap: 14px;
+  }
+
+  .machine {
+    width: min(100%, 460px);
+    aspect-ratio: 3 / 5;
+  }
+
+  .machine-body {
+    inset: 12% 10.5% 10.5%;
+    padding: 12px;
+    border-radius: 26px;
+  }
+
+  .display-card {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .display-preview {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+  }
+
+  .display-preview svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .display-copy strong {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .display-kicker {
+    font-size: 10px;
+  }
+
+  .ingredient-grid {
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ingredient {
+    min-height: 92px;
+    padding: 10px 9px 8px;
+    border-radius: 18px;
+  }
+
+  .ingredient svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ingredient span {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .payment-module {
+    margin-top: 8px;
+  }
+
+  .payment-bay {
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .slot-shell {
+    width: 132px;
+    height: 90px;
+  }
+
+  .slot-mouth,
+  .slot-scan {
+    width: 86px;
+  }
+
+  .payment-card {
+    width: 138px;
+    right: 12px;
+  }
+
+  .card-button {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .control-row {
+    margin-top: 8px;
+  }
+
+  .power-switch {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+  }
+
+  .power-switch svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .power-pill {
+    padding: 9px 12px;
+  }
+
+  .power-pill span {
+    font-size: 11px;
+  }
+
+  .power-pill em {
+    font-size: 10px;
+  }
+
+  .outlet-module {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  .outlet-mouth {
+    height: 50px;
+    border-radius: 14px;
+  }
+
+  .outlet-tray {
+    width: 82%;
+  }
+
+  .dispense-stage {
+    width: 240px;
+    height: 170px;
   }
 
   .channel-top {
@@ -1629,46 +1804,58 @@ h1 {
   }
 
   .video-frame {
-    min-height: 380px;
+    min-height: 300px;
+  }
+
+  .video-portrait {
+    inset: 56px 12px 68px;
+  }
+
+  .host-avatar {
+    width: min(92%, 300px);
+    max-height: 240px;
+    transform: translate(-50%, -48%);
+  }
+
+  .video-snack {
+    width: 200px;
+    height: 268px;
+    top: 66%;
+    transform: translate(-50%, 24%) scale(0.42);
+  }
+
+  .video-snack .tanghulu-item {
+    width: 200px;
+    height: 268px;
+  }
+
+  .video-caption {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 12px 13px;
+    border-radius: 18px;
+  }
+
+  .video-caption strong {
+    font-size: 16px;
+  }
+
+  .video-caption p {
+    font-size: 13px;
+  }
+
+  .review-panel {
+    gap: 10px;
+    margin-top: 12px;
   }
 
   .display-card {
     grid-template-columns: 72px minmax(0, 1fr);
   }
 
-  .display-preview {
-    width: 72px;
-    height: 72px;
-    border-radius: 20px;
-  }
-
-  .display-preview svg {
-    width: 48px;
-    height: 48px;
-  }
-
   .ingredient-grid {
-    gap: 8px;
-  }
-
-  .ingredient {
-    padding: 10px 10px 9px;
-    border-radius: 18px;
-  }
-
-  .ingredient svg {
-    width: 42px;
-    height: 42px;
-  }
-
-  .slot-mouth,
-  .slot-scan {
-    width: 96px;
-  }
-
-  .payment-card {
-    width: 146px;
-    right: 14px;
+    gap: 7px;
   }
 
   .payment-module.is-in-slot .payment-card {
@@ -1697,5 +1884,66 @@ h1 {
     100% {
       transform: translate(0, -50%) rotate(-8deg);
     }
+  }
+}
+
+@media (max-width: 420px) {
+  .scene {
+    padding: 14px 10px 16px;
+  }
+
+  .machine {
+    aspect-ratio: 3 / 6;
+  }
+
+  .display-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .display-copy {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+
+  .ingredient-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-button,
+  .power-pill {
+    width: 100%;
+  }
+
+  .control-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .power-switch {
+    align-self: center;
+  }
+
+  .power-pill {
+    text-align: center;
+  }
+
+  .video-frame {
+    min-height: 300px;
+  }
+
+  .review-score {
+    padding: 11px 12px;
+  }
+
+  .review-score strong {
+    font-size: 24px;
+  }
+
+  .comment-chip {
+    font-size: 12px;
+    padding: 10px 12px;
   }
 }
