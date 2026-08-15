@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>스네이크 게임</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <div class="eyebrow">1인용 스네이크</div>
+      <h1>먹이를 먹고, 꼬리를 길게!</h1>
+      <p class="lede" id="message">
+        방향키나 WASD로 움직여요. 먹이를 먹으면 뱀이 길어지고, 벽이나 자기 몸에 부딪히면 끝나요.
+      </p>
+
+      <div class="stats" aria-live="polite">
+        <div class="stat">
+          <span class="label">점수</span>
+          <strong id="score">0</strong>
+        </div>
+        <div class="stat">
+          <span class="label">최고</span>
+          <strong id="best">0</strong>
+        </div>
+        <div class="stat">
+          <span class="label">속도</span>
+          <strong id="speed">1</strong>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" type="button">시작 / 다시하기</button>
+        <button id="soundBtn" type="button" class="secondary">소리 켜기</button>
+      </div>
+
+      <div class="help">
+        <div><b>조작</b> 방향키 / WASD</div>
+        <div><b>목표</b> 먹이를 계속 먹기</div>
+        <div><b>팁</b> 너무 빨리 꺾으면 못 가요</div>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="board-wrap">
+        <canvas id="game" aria-label="스네이크 게임 화면"></canvas>
+        <div class="overlay" id="overlay">
+          <span class="overlay-title">준비 완료</span>
+          <span class="overlay-text">시작 버튼을 누르거나 스페이스를 눌러 시작해요.</span>
+        </div>
+      </div>
+
+      <div class="touch-controls" aria-label="터치 조작">
+        <button data-dir="up" class="pad top">▲</button>
+        <div class="pad-row">
+          <button data-dir="left" class="pad">◀</button>
+          <button data-dir="down" class="pad">▼</button>
+          <button data-dir="right" class="pad">▶</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./game.js"></script>
+</body>
+</html>

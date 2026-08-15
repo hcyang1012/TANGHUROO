@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>탕후루 자판기</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="icon-power" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="6" opacity=".9"/>
+      <path d="M32 11v21" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icon-card" viewBox="0 0 64 64">
+      <rect x="10" y="16" width="44" height="32" rx="8" fill="none" stroke="currentColor" stroke-width="5"/>
+      <rect x="17" y="25" width="14" height="10" rx="3" fill="currentColor" opacity=".9"/>
+      <path d="M36 25h12M36 33h8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icon-vending" viewBox="0 0 64 64">
+      <rect x="13" y="8" width="38" height="48" rx="10" fill="none" stroke="currentColor" stroke-width="5"/>
+      <rect x="19" y="14" width="26" height="8" rx="4" fill="currentColor"/>
+      <rect x="20" y="28" width="24" height="18" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>
+      <path d="M26 33h12" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="24" cy="50" r="2.5" fill="currentColor"/>
+      <circle cx="40" cy="50" r="2.5" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-outlet" viewBox="0 0 64 64">
+      <path d="M13 30h38v12a5 5 0 0 1-5 5H18a5 5 0 0 1-5-5V30z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M23 36l9 9 9-9" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-strawberry" viewBox="0 0 64 64">
+      <path d="M23 18c2-4 6-6 9-6s7 2 9 6c4 1 8 5 8 10 0 15-8 25-17 25S15 43 15 28c0-5 4-9 8-10z" fill="currentColor"/>
+      <path d="M26 12c3 1 5 3 6 6 1-3 3-5 6-6" fill="none" stroke="#eaffd6" stroke-width="4" stroke-linecap="round"/>
+      <path d="M23 15l-5-5M41 15l5-5" stroke="#7ef1a8" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="28" cy="28" r="2" fill="#fff8d6"/>
+      <circle cx="36" cy="30" r="2" fill="#fff8d6"/>
+      <circle cx="31" cy="37" r="2" fill="#fff8d6"/>
+      <circle cx="40" cy="39" r="2" fill="#fff8d6"/>
+    </symbol>
+    <symbol id="icon-grape" viewBox="0 0 64 64">
+      <path d="M30 12c4 0 7 2 9 5 4 0 8 3 8 8 0 4-2 7-5 9 1 8-4 14-12 14-8 0-13-6-12-14-3-2-5-5-5-9 0-5 4-8 8-8 2-3 5-5 9-5z" fill="currentColor"/>
+      <path d="M30 13c0-4 2-6 5-8" fill="none" stroke="#86e48f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M31 15c5-1 9 1 12 5" fill="none" stroke="#86e48f" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="24" cy="24" r="7" fill="none" stroke="#fff" stroke-width="2" opacity=".28"/>
+    </symbol>
+    <symbol id="icon-orange" viewBox="0 0 64 64">
+      <circle cx="32" cy="34" r="18" fill="currentColor"/>
+      <path d="M32 16c4 0 7 1 10 4" fill="none" stroke="#7ff0c8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M32 18v-5" stroke="#7ff0c8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M22 29l20 10M22 39l20-10" stroke="#fff4c6" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+    </symbol>
+    <symbol id="icon-blueberry" viewBox="0 0 64 64">
+      <circle cx="32" cy="34" r="16" fill="currentColor"/>
+      <circle cx="27" cy="29" r="3" fill="#fff8da"/>
+      <path d="M26 18c3 0 6 1 8 3 3 0 6 1 8 4" fill="none" stroke="#8ee3a3" stroke-width="4" stroke-linecap="round"/>
+      <path d="M28 17c0-3 2-5 4-6" fill="none" stroke="#8ee3a3" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icon-kiwi" viewBox="0 0 64 64">
+      <circle cx="32" cy="34" r="18" fill="currentColor"/>
+      <circle cx="32" cy="34" r="12" fill="#dff9b8"/>
+      <g fill="#2e6d2f">
+        <circle cx="32" cy="24" r="1.6"/><circle cx="38" cy="26" r="1.6"/><circle cx="42" cy="31" r="1.6"/>
+        <circle cx="41" cy="38" r="1.6"/><circle cx="35" cy="43" r="1.6"/><circle cx="28" cy="43" r="1.6"/>
+        <circle cx="22" cy="38" r="1.6"/><circle cx="21" cy="31" r="1.6"/><circle cx="25" cy="26" r="1.6"/>
+      </g>
+    </symbol>
+    <symbol id="icon-tomato" viewBox="0 0 64 64">
+      <circle cx="32" cy="34" r="17" fill="currentColor"/>
+      <path d="M32 13c3 0 6 1 8 4 3 0 5 1 7 4-4 1-7 3-9 5-2-2-4-4-6-5-2 1-4 3-6 5-2-2-5-4-9-5 2-3 4-4 7-4 2-3 5-4 8-4z" fill="#7ad38c"/>
+      <circle cx="26" cy="28" r="2" fill="#fff7d8"/>
+      <circle cx="38" cy="31" r="2" fill="#fff7d8"/>
+    </symbol>
+    <symbol id="icon-tanghulu" viewBox="0 0 64 64">
+      <path d="M18 14l28 40" fill="none" stroke="#be8a47" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="24" cy="21" r="7" fill="currentColor"/>
+      <circle cx="32" cy="34" r="8" fill="currentColor"/>
+      <circle cx="40" cy="45" r="7" fill="currentColor"/>
+      <circle cx="22" cy="18" r="2" fill="#fff" opacity=".7"/>
+      <circle cx="29" cy="31" r="2" fill="#fff" opacity=".7"/>
+      <circle cx="37" cy="42" r="2" fill="#fff" opacity=".7"/>
+    </symbol>
+  </svg>
+
+  <main class="scene">
+    <section class="intro">
+      <div class="eyebrow"><svg><use href="#icon-vending"></use></svg><span>아이디어 1단계</span></div>
+      <h1>도형과 아이콘으로 만든 탕후루 자판기</h1>
+      <p class="desc">
+        기계는 세로형 자판기 스타일이고, 재료를 고른 뒤 카드를 넣고 빼면 탕후루가 토출돼요.
+        그다음 먹방 창에서 진행자가 실제로 한입 먹고 리뷰하는 흐름으로 이어집니다.
+      </p>
+    </section>
+
+    <div class="mobile-toolbar" aria-label="모바일 빠른 조작">
+      <div class="mobile-toolbar-label">
+        <svg aria-hidden="true"><use href="#icon-vending"></use></svg>
+        <span>모바일 조작</span>
+      </div>
+      <div class="mobile-toolbar-actions">
+        <button id="mobilePowerSwitch" class="mobile-action power" type="button" aria-pressed="false" aria-label="전원">
+          <svg aria-hidden="true"><use href="#icon-power"></use></svg>
+          <span>OFF</span>
+        </button>
+        <button id="mobileCardButton" class="mobile-action card" type="button">
+          <svg aria-hidden="true"><use href="#icon-card"></use></svg>
+          <span>카드 넣기</span>
+        </button>
+      </div>
+      <p class="mobile-toolbar-hint">카드와 전원은 여기서 바로 조작할 수 있어요.</p>
+    </div>
+
+    <section class="studio-layout">
+      <section class="machine-area" aria-label="탕후루 자판기">
+        <div class="machine" id="machine" data-running="false">
+          <div class="machine-shadow"></div>
+
+          <div class="machine-head">
+            <div class="head-badge">
+              <svg class="badge-icon"><use href="#icon-vending"></use></svg>
+              <span>TANGHUROO</span>
+            </div>
+            <div class="head-lights">
+              <i></i><i></i><i></i>
+            </div>
+          </div>
+
+          <div class="machine-body">
+            <div class="display-card">
+              <div class="display-preview" id="previewIcon" aria-hidden="true">
+                <svg><use href="#icon-strawberry"></use></svg>
+              </div>
+              <div class="display-copy">
+                <span class="display-kicker">SWEET VENDING</span>
+                <strong id="selectedLabel">딸기 탕후루</strong>
+                <p id="machineStatus">전원을 켜고 재료를 골라 주세요.</p>
+              </div>
+            </div>
+
+            <div class="ingredient-grid" aria-label="재료 선택">
+              <button class="ingredient is-active" type="button" data-ingredient="strawberry">
+                <svg><use href="#icon-strawberry"></use></svg>
+                <span>STRAWBERRY</span>
+              </button>
+              <button class="ingredient" type="button" data-ingredient="grape">
+                <svg><use href="#icon-grape"></use></svg>
+                <span>GRAPE</span>
+              </button>
+              <button class="ingredient" type="button" data-ingredient="orange">
+                <svg><use href="#icon-orange"></use></svg>
+                <span>ORANGE</span>
+              </button>
+              <button class="ingredient" type="button" data-ingredient="blueberry">
+                <svg><use href="#icon-blueberry"></use></svg>
+                <span>BLUEBERRY</span>
+              </button>
+              <button class="ingredient" type="button" data-ingredient="kiwi">
+                <svg><use href="#icon-kiwi"></use></svg>
+                <span>KIWI</span>
+              </button>
+              <button class="ingredient" type="button" data-ingredient="tomato">
+                <svg><use href="#icon-tomato"></use></svg>
+                <span>TOMATO</span>
+              </button>
+            </div>
+
+            <div class="payment-module" id="paymentModule">
+              <div class="payment-bay">
+                <div class="bay-caption">
+                  <svg><use href="#icon-card"></use></svg>
+                  <span>CARD</span>
+                </div>
+                <div class="slot-shell">
+                  <div class="slot-mouth"></div>
+                  <div class="slot-scan"></div>
+                  <div class="slot-glow"></div>
+                </div>
+                <div class="payment-card" id="paymentCard" aria-hidden="true">
+                  <div class="card-top">
+                    <svg class="card-icon"><use href="#icon-card"></use></svg>
+                    <div class="chip"></div>
+                  </div>
+                  <div class="card-line"></div>
+                  <div class="card-line short"></div>
+                </div>
+              </div>
+              <button id="cardButton" class="card-button" type="button">
+                <svg><use href="#icon-card"></use></svg>
+                <span>카드 넣기</span>
+              </button>
+            </div>
+
+            <div class="control-row">
+              <button id="powerSwitch" class="power-switch" type="button" aria-pressed="false" aria-label="전원">
+                <svg><use href="#icon-power"></use></svg>
+              </button>
+              <div class="power-pill">
+                <span id="powerLabel">OFF</span>
+                <em>ON / OFF</em>
+              </div>
+            </div>
+
+            <div class="outlet-module">
+              <div class="outlet-head">
+                <svg><use href="#icon-outlet"></use></svg>
+                <span>토출구</span>
+              </div>
+              <div class="outlet-mouth"></div>
+              <div class="outlet-tray"></div>
+              <div class="dispense-stage" id="dispenseStage"></div>
+            </div>
+          </div>
+
+          <div class="machine-feet feet-left"></div>
+          <div class="machine-feet feet-right"></div>
+        </div>
+      </section>
+
+      <aside class="broadcast-panel" aria-label="먹방 방송 창">
+        <div class="channel-top">
+          <div class="channel-brand">
+            <div class="channel-dot"></div>
+            <div>
+              <strong>탕후루 먹방 리뷰</strong>
+              <span>live mukbang</span>
+            </div>
+          </div>
+          <div class="subscriber-box">
+            <span>구독자수</span>
+            <strong id="subscriberCount">128,540</strong>
+            <em>명</em>
+          </div>
+        </div>
+
+        <div class="video-frame">
+          <div class="video-badge">LIVE</div>
+          <div class="video-portrait">
+            <img class="host-avatar" src="host-avatar.svg" alt="귀여운 먹방 진행자 아바타" />
+            <div class="host-bow" aria-hidden="true"></div>
+            <div class="video-snack" id="videoSnack" aria-hidden="true"></div>
+          </div>
+          <div class="video-caption">
+            <strong id="hostTitle">오늘은 딸기 탕후루</strong>
+            <p id="hostTalk">바삭한 첫 입감부터 자세히 리뷰할게요.</p>
+          </div>
+        </div>
+
+        <div class="review-panel">
+          <div class="review-score">
+            <span>리뷰 점수</span>
+            <strong id="reviewScore">9.4</strong>
+          </div>
+          <div class="review-bars">
+            <div class="review-bar"><i id="sweetBar"></i><span>달콤함</span></div>
+            <div class="review-bar"><i id="crunchBar"></i><span>바삭함</span></div>
+            <div class="review-bar"><i id="funBar"></i><span>재미</span></div>
+          </div>
+        </div>
+
+        <div class="comment-stack" id="commentStack">
+          <div class="comment-chip">와, 진짜 바삭해 보인다!</div>
+          <div class="comment-chip">한입 먹는 타이밍 기다리는 중.</div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="notes">
+      <div class="note-card">
+        <div class="note-icon"><svg><use href="#icon-kiwi"></use></svg></div>
+        <strong>게임 흐름</strong>
+        <p>재료 선택, 카드 결제, 토출, 먹방 리뷰까지 하나의 작은 방송 체험으로 이어집니다.</p>
+      </div>
+      <div class="note-card">
+        <div class="note-icon"><svg><use href="#icon-tanghulu"></use></svg></div>
+        <strong>다음 단계</strong>
+        <p>이제 먹는 애니메이션을 더 길고 귀엽게 다듬으면, 탕후루 먹방이 훨씬 살아납니다.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>

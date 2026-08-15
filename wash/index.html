@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>창문 닦기 게임 (접근성 개선 & 난이도 극악!)</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Pretendard', sans-serif;
+            background-color: #1a1a2e;
+            overflow: hidden;
+        }
+
+        /* 1. 화면 크기 축소 (키 작은 사람도 닿기 쉽게) */
+        .game-container {
+            position: relative;
+            width: 85vw;
+            /* 기존 95vw -> 85vw */
+            height: 80vh;
+            /* 기존 90vh -> 80vh */
+            max-width: 1200px;
+            /* 최대 크기도 축소 */
+            max-height: 800px;
+            border-radius: 12px;
+            border: 15px solid #8c92ac;
+            overflow: hidden;
+            box-shadow:
+                inset 0 0 30px rgba(0, 0, 0, 0.8),
+                0 15px 50px rgba(0, 0, 0, 0.9);
+            background-color: #000;
+        }
+
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            z-index: 1;
+        }
+
+        #dirtCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        #uiCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #topBar {
+            margin-top: 2vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        #status {
+            font-size: 18px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .hint-text {
+            color: #f1c40f;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #timerDisplay {
+            display: none;
+            font-size: 48px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #2ecc71;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 30px;
+            border-radius: 15px;
+            text-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
+            border: 2px solid #2ecc71;
+        }
+
+        #clearMessage {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.8), 2px 2px 5px #000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px 80px;
+            border-radius: 20px;
+            pointer-events: auto;
+            text-align: center;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="dirtCanvas"></canvas>
+        <canvas id="uiCanvas"></canvas>
+
+        <div id="overlay">
+            <div id="topBar">
+                <div id="status">웹캠을 불러오는 중입니다... (최대 4인)</div>
+                <button id="startBtn" style="display: none;">▶ 🧽 다함께 창문 닦기 시작!<br><span class="hint-text">(찌든 때는 아주 여러
+                        번 빡빡 문질러야 합니다!)</span></button>
+                <div id="timerDisplay">00:00.00</div>
+            </div>
+            <div id="clearMessage">
+                ✨ 반짝반짝! ✨<br>
+                <span id="finalTime" style="font-size: 40px; color: white;"></span><br>
+                <button onclick="location.reload()" style="margin-top:20px; font-size: 24px;">다시 하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.querySelector('.game-container');
+        const videoElement = document.getElementById('video');
+        const dirtCanvas = document.getElementById('dirtCanvas');
+        const uiCanvas = document.getElementById('uiCanvas');
+        const dirtCtx = dirtCanvas.getContext('2d', { willReadFrequently: true });
+        const uiCtx = uiCanvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const statusText = document.getElementById('status');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const clearMessage = document.getElementById('clearMessage');
+
+        let isGameStarted = false;
+        let isGameCleared = false;
+        let handTrackerReady = false;
+
+        let activeHands = [];
+        let prevHands = [];
+        let particles = [];
+        let remainingSpots = [];
+        let initialDirtCount = 0;
+        let currentEraserRadius = 100;
+
+        function resizeCanvas() {
+            dirtCanvas.width = uiCanvas.width = container.clientWidth;
+            dirtCanvas.height = uiCanvas.height = container.clientHeight;
+            currentEraserRadius = Math.max(container.clientWidth * 0.08, 70);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let lastSoundTime = 0;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playWipeSound() {
+            let now = audioCtx.currentTime;
+            if (now - lastSoundTime < 0.1) return;
+            lastSoundTime = now;
+
+            const bufferSize = audioCtx.sampleRate * 0.1;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400 + Math.random() * 150;
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.08, now + 0.02);
+            gain.gain.linearRampToValueAtTime(0, now + 0.1);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start(now);
+
+            if (Math.random() < 0.3) {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                const startFreq = 2000 + Math.random() * 500;
+                osc.frequency.setValueAtTime(startFreq, now);
+                osc.frequency.exponentialRampToValueAtTime(startFreq * 0.8, now + 0.1);
+
+                const oscGain = audioCtx.createGain();
+                oscGain.gain.setValueAtTime(0, now);
+                oscGain.gain.linearRampToValueAtTime(0.015, now + 0.02);
+                oscGain.gain.linearRampToValueAtTime(0, now + 0.1);
+
+                osc.connect(oscGain);
+                oscGain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+
+        function startBGM() {
+            let nextNoteTime = audioCtx.currentTime + 0.1;
+            let step = 0;
+            function schedule() {
+                if (!isGameStarted || isGameCleared) return;
+                while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                    const chords = [[261.63, 329.63, 392.00], [261.63, 349.23, 440.00], [293.66, 392.00, 493.88], [261.63, 329.63, 392.00]];
+                    const currentChord = chords[Math.floor(step / 8) % 4];
+                    if (step % 2 === 0) {
+                        currentChord.forEach(f => playBGMNote(f, nextNoteTime, 0.02));
+                    } else {
+                        playBGMNote(currentChord[0] / 2, nextNoteTime, 0.03);
+                    }
+                    nextNoteTime += 0.25; step++;
+                }
+                requestAnimationFrame(schedule);
+            }
+            function playBGMNote(freq, time, vol) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle'; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(vol, time + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(time); osc.stop(time + 0.25);
+            }
+            schedule();
+        }
+
+        function spawnFoam(x, y) {
+            for (let i = 0; i < 2; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * currentEraserRadius,
+                    y: y + (Math.random() - 0.5) * currentEraserRadius,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: Math.random() * 2 + 1,
+                    life: 1.0,
+                    size: Math.random() * 15 + 5
+                });
+            }
+        }
+
+        let startTime;
+        let elapsedTime = 0;
+
+        function gameLoop() {
+            if (!isGameStarted || isGameCleared) return;
+
+            elapsedTime = Date.now() - startTime;
+            const minutes = String(Math.floor(elapsedTime / 60000)).padStart(2, '0');
+            const seconds = String(Math.floor((elapsedTime % 60000) / 1000)).padStart(2, '0');
+            const milliseconds = String(Math.floor((elapsedTime % 1000) / 10)).padStart(2, '0');
+            timerDisplay.innerText = `${minutes}:${seconds}.${milliseconds}`;
+
+            uiCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    uiCtx.beginPath();
+                    uiCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    uiCtx.fillStyle = `rgba(200, 230, 255, ${p.life * 0.6})`;
+                    uiCtx.fill();
+                }
+            }
+
+            if (elapsedTime > 30000 && remainingSpots.length > 0) {
+                const pulse = (Math.sin(elapsedTime / 150) + 1) / 2;
+                uiCtx.fillStyle = `rgba(255, 0, 0, ${pulse * 0.5})`;
+                for (let i = 0; i < Math.min(10, remainingSpots.length); i++) {
+                    const spot = remainingSpots[i];
+                    uiCtx.beginPath();
+                    uiCtx.arc(spot.x, spot.y, 60, 0, Math.PI * 2);
+                    uiCtx.fill();
+                }
+            }
+
+            const emojiSize = currentEraserRadius * 2.1;
+            uiCtx.font = `${emojiSize}px Arial`;
+            uiCtx.textAlign = "center";
+            uiCtx.textBaseline = "middle";
+            activeHands.forEach(pos => {
+                uiCtx.fillText("🧽", pos.x, pos.y);
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        const checkCanvas = document.createElement('canvas');
+        checkCanvas.width = 64; checkCanvas.height = 64;
+        const checkCtx = checkCanvas.getContext('2d', { willReadFrequently: true });
+
+        function checkDirtProgress() {
+            if (!isGameStarted || isGameCleared) return;
+
+            checkCtx.clearRect(0, 0, 64, 64);
+            checkCtx.drawImage(dirtCanvas, 0, 0, 64, 64);
+            const imgData = checkCtx.getImageData(0, 0, 64, 64).data;
+
+            let currentDirtCount = 0;
+            remainingSpots = [];
+
+            for (let i = 3; i < imgData.length; i += 4) {
+                if (imgData[i] > 50) {
+                    currentDirtCount++;
+                    let index = (i - 3) / 4;
+                    let x = (index % 64) / 64 * uiCanvas.width;
+                    let y = Math.floor(index / 64) / 64 * uiCanvas.height;
+                    if (Math.random() < 0.1) remainingSpots.push({ x, y });
+                }
+            }
+            if (initialDirtCount === 0) initialDirtCount = currentDirtCount;
+
+            if (currentDirtCount / initialDirtCount < 0.04) gameClear();
+        }
+
+        function gameClear() {
+            isGameCleared = true;
+            uiCtx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
+            dirtCtx.clearRect(0, 0, dirtCanvas.width, dirtCanvas.height);
+            timerDisplay.style.display = 'none';
+            clearMessage.style.display = 'block';
+            document.getElementById('finalTime').innerText = `기록: ${timerDisplay.innerText}`;
+        }
+
+        const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        hands.setOptions({ maxNumHands: 8, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        hands.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => { if (handTrackerReady) await hands.send({ image: videoElement }); },
+            width: 1280, height: 720
+        });
+
+        camera.start().then(() => {
+            statusText.style.display = 'none';
+            startBtn.style.display = 'block';
+            handTrackerReady = true;
+        });
+
+        startBtn.addEventListener('click', () => {
+            if (!handTrackerReady) return;
+            initAudio(); resizeCanvas();
+
+            isGameStarted = true;
+            startBtn.style.display = 'none';
+            timerDisplay.style.display = 'block';
+
+            dirtCtx.globalCompositeOperation = 'source-over';
+
+            dirtCtx.fillStyle = 'rgba(70, 60, 50, 0.98)';
+            dirtCtx.fillRect(0, 0, dirtCanvas.width, dirtCanvas.height);
+
+            // 2. 찌든 때 생성량 증가 (기존 20~30개 -> 30~44개)
+            const stubbornSpotsCount = Math.floor(Math.random() * 15) + 30;
+            for (let i = 0; i < stubbornSpotsCount; i++) {
+                const sx = Math.random() * dirtCanvas.width;
+                const sy = Math.random() * dirtCanvas.height;
+                const sRadius = Math.random() * 150 + 50;
+
+                const grad = dirtCtx.createRadialGradient(sx, sy, 0, sx, sy, sRadius);
+                grad.addColorStop(0, 'rgba(30, 20, 10, 0.95)');
+                grad.addColorStop(1, 'rgba(30, 20, 10, 0)');
+
+                dirtCtx.fillStyle = grad;
+                dirtCtx.beginPath();
+                dirtCtx.arc(sx, sy, sRadius, 0, Math.PI * 2);
+                dirtCtx.fill();
+            }
+
+            dirtCtx.globalCompositeOperation = 'destination-out';
+
+            startTime = Date.now();
+            requestAnimationFrame(gameLoop);
+            startBGM();
+            setInterval(checkDirtProgress, 1000);
+        });
+
+        function onResults(results) {
+            if (!isGameStarted || isGameCleared) return;
+
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+            const vw = videoElement.videoWidth; const vh = videoElement.videoHeight;
+            const scale = Math.max(cw / vw, ch / vh);
+            const scaledW = vw * scale; const scaledH = vh * scale;
+            const offsetX = (scaledW - cw) / 2; const offsetY = (scaledH - ch) / 2;
+
+            let currentHands = [];
+            let handsDetected = false;
+
+            if (results.multiHandLandmarks) {
+                for (const landmarks of results.multiHandLandmarks) {
+                    const mainPoint = landmarks[9];
+                    if (mainPoint) {
+                        const x = cw - ((mainPoint.x * scaledW) - offsetX);
+                        const y = (mainPoint.y * scaledH) - offsetY;
+                        currentHands.push({ x, y });
+                    }
+                }
+            }
+
+            dirtCtx.lineWidth = currentEraserRadius * 2;
+            dirtCtx.lineCap = 'round';
+            dirtCtx.lineJoin = 'round';
+
+            currentHands.forEach(curr => {
+                let closestDist = Infinity;
+                let closestPrev = null;
+
+                prevHands.forEach(prev => {
+                    let d = Math.hypot(curr.x - prev.x, curr.y - prev.y);
+                    if (d < closestDist) { closestDist = d; closestPrev = prev; }
+                });
+
+                dirtCtx.beginPath();
+                if (closestPrev && closestDist < currentEraserRadius * 3) {
+                    dirtCtx.moveTo(closestPrev.x, closestPrev.y);
+                    dirtCtx.lineTo(curr.x, curr.y);
+                    spawnFoam(curr.x, curr.y);
+                } else {
+                    dirtCtx.moveTo(curr.x, curr.y);
+                    dirtCtx.lineTo(curr.x, curr.y);
+                }
+
+                // [난이도 대폭 상승!] 한 번에 지워지는 양을 15%로 낮춤 (기존 35%)
+                // 같은 곳을 최소 6~7번 왕복해야 얼룩이 완전히 투명해집니다.
+                dirtCtx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+                dirtCtx.stroke();
+                handsDetected = true;
+            });
+
+            activeHands = currentHands;
+            prevHands = currentHands;
+
+            if (handsDetected) playWipeSound();
+        }
+    </script>
+</body>
+
+</html>
