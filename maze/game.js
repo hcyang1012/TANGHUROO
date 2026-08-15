@@ -4,6 +4,7 @@
   const statusEl = document.getElementById("status");
   const newMazeBtn = document.getElementById("newMazeBtn");
   const easyBtn = document.getElementById("easyBtn");
+  const mobileButtons = Array.from(document.querySelectorAll(".dir-btn"));
 
   const state = {
     cols: 7,
@@ -379,6 +380,60 @@
     }
   }
 
+  function handleMobilePress(button) {
+    const dir = button.dataset.dir;
+    const action = button.dataset.action;
+    if (dir) {
+      inputFromDirection(dir);
+      return;
+    }
+    if (action === "restart") {
+      newMaze();
+    }
+  }
+
+  function bindMobileControls() {
+    for (const button of mobileButtons) {
+      button.addEventListener("click", () => handleMobilePress(button));
+      button.addEventListener(
+        "touchstart",
+        (e) => {
+          e.preventDefault();
+          handleMobilePress(button);
+        },
+        { passive: false }
+      );
+    }
+  }
+
+  function setupSwipeControls() {
+    let startX = 0;
+    let startY = 0;
+    let active = false;
+
+    canvas.addEventListener("pointerdown", (e) => {
+      active = true;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    canvas.addEventListener("pointerup", (e) => {
+      if (!active) return;
+      active = false;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      if (Math.max(absX, absY) < 28) return;
+      if (absX > absY) inputFromDirection(dx > 0 ? "right" : "left");
+      else inputFromDirection(dy > 0 ? "down" : "up");
+    });
+
+    canvas.addEventListener("pointercancel", () => {
+      active = false;
+    });
+  }
+
   function pollGamepad() {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     const pad = pads && pads[0];
@@ -427,6 +482,8 @@
   easyBtn.addEventListener("click", () => {
     setDifficulty(state.mode === "easy" ? "normal" : "easy");
   });
+  bindMobileControls();
+  setupSwipeControls();
   window.addEventListener("gamepadconnected", () => {
     statusEl.textContent = "게임패드가 연결됐어요. 왼쪽 스틱이나 십자키로 움직여 보세요.";
   });
