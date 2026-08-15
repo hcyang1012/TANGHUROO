@@ -224,7 +224,7 @@ button:active {
   display: none;
 }
 
-.mobile-actions {
+.mobile-dock {
   display: none;
 }
 
@@ -318,10 +318,38 @@ button:active {
     gap: 10px;
   }
 
-  button {
+  .controls button {
     padding: 13px 16px;
     font-size: 16px;
     border-radius: 16px;
+  }
+
+  .hud .controls {
+    display: none;
+  }
+
+  .mobile-dock {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    position: sticky;
+    top: 10px;
+    z-index: 20;
+    width: min(100%, 760px);
+    justify-self: center;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(122, 84, 43, 0.14);
+    box-shadow: 0 12px 28px rgba(122, 84, 43, 0.14);
+    backdrop-filter: blur(10px);
+  }
+
+  .mobile-dock button {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-size: 15px;
   }
 
   .stage {
@@ -361,21 +389,6 @@ button:active {
     padding: 8px 12px;
     border-radius: 16px;
     gap: 10px;
-  }
-
-  .mobile-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    width: min(100%, 360px);
-    justify-self: center;
-  }
-
-  .mobile-actions button {
-    width: 100%;
-    padding: 13px 14px;
-    border-radius: 18px;
-    font-size: 16px;
   }
 
   .mobile-controls {
@@ -419,10 +432,6 @@ button:active {
   .mobile-controls {
     width: 100%;
     padding: 12px;
-  }
-
-  .mobile-actions {
-    width: 100%;
   }
 
   .dir-btn {

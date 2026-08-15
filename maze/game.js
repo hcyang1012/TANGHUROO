@@ -5,7 +5,7 @@
   const newMazeBtn = document.getElementById("newMazeBtn");
   const easyBtn = document.getElementById("easyBtn");
   const mobileButtons = Array.from(document.querySelectorAll(".dir-btn"));
-  const mobileActionButtons = Array.from(document.querySelectorAll(".mobile-actions [data-action]"));
+  const mobileActionButtons = Array.from(document.querySelectorAll(".mobile-dock [data-action]"));
 
   const state = {
     cols: 7,
