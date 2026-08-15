@@ -1645,6 +1645,10 @@ h1 {
     gap: 8px;
   }
 
+  .desc {
+    display: none;
+  }
+
   .eyebrow {
     padding: 6px 11px;
     font-size: 11px;
@@ -1666,8 +1670,8 @@ h1 {
   }
 
   .machine {
-    width: min(100%, 380px);
-    aspect-ratio: 4 / 6;
+    width: min(100%, 330px);
+    aspect-ratio: 4 / 5.2;
   }
 
   .machine-body {
@@ -1898,6 +1902,11 @@ h1 {
     letter-spacing: 0.06em;
   }
 
+  .broadcast-panel,
+  .notes {
+    display: none;
+  }
+
   .payment-module.is-in-slot .payment-card {
     transform: translate(-132px, -50%) rotate(0deg);
   }
@@ -1929,13 +1938,13 @@ h1 {
 
 @media (max-width: 420px) {
   .scene {
-    padding: 12px 10px 14px;
-    gap: 12px;
+    padding: 10px 10px 12px;
+    gap: 10px;
   }
 
   .machine {
-    width: min(100%, 330px);
-    aspect-ratio: 4 / 5.7;
+    width: min(100%, 300px);
+    aspect-ratio: 4 / 5.1;
   }
 
   .display-card {
