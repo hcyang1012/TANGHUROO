@@ -94,6 +94,10 @@
     newMaze();
   }
 
+  function showIntroOverlay() {
+    overlayEl.classList.remove("hidden");
+  }
+
   function newMaze() {
     state.maze = buildMaze(state.cols, state.rows);
     state.player = { x: 0, y: 0 };
@@ -502,6 +506,7 @@
   });
 
   setDifficulty("easy");
+  showIntroOverlay();
   requestAnimationFrame(draw);
   requestAnimationFrame(loopGamepad);
 })();
