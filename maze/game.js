@@ -3,10 +3,14 @@
   const ctx = canvas.getContext("2d");
   const statusEl = document.getElementById("status");
   const overlayEl = document.getElementById("overlay");
+  const overlayTitleEl = overlayEl.querySelector(".overlay-title");
+  const overlayTextEl = overlayEl.querySelector(".overlay-text");
   const newMazeBtn = document.getElementById("newMazeBtn");
   const easyBtn = document.getElementById("easyBtn");
-  const mobileButtons = Array.from(document.querySelectorAll(".dir-btn"));
-  const mobileActionButtons = Array.from(document.querySelectorAll(".mobile-toolbar [data-action]"));
+  const mobileActionButtons = Array.from(
+    document.querySelectorAll(".mobile-toolbar [data-action]")
+  );
+  const dirButtons = Array.from(document.querySelectorAll(".dir-btn[data-dir]"));
 
   const state = {
     cols: 7,
@@ -17,20 +21,18 @@
     goal: { x: 0, y: 0 },
     won: false,
     winTime: 0,
-    holdDir: null,
-    holdTimer: 0,
-    lastPadButtons: [],
     lastMoveAt: 0,
     confetti: [],
-    mode: "easy"
+    mode: "easy",
+    swipeStart: null,
   };
 
-  const DIRS = [
-    { name: "up", dx: 0, dy: -1, wall: "n", opposite: "s", button: 12 },
-    { name: "right", dx: 1, dy: 0, wall: "e", opposite: "w", button: 15 },
-    { name: "down", dx: 0, dy: 1, wall: "s", opposite: "n", button: 13 },
-    { name: "left", dx: -1, dy: 0, wall: "w", opposite: "e", button: 14 },
-  ];
+  const DIRS = {
+    up: { dx: 0, dy: -1, wall: "n", opposite: "s" },
+    right: { dx: 1, dy: 0, wall: "e", opposite: "w" },
+    down: { dx: 0, dy: 1, wall: "s", opposite: "n" },
+    left: { dx: -1, dy: 0, wall: "w", opposite: "e" },
+  };
 
   function randInt(max) {
     return Math.floor(Math.random() * max);
@@ -52,7 +54,7 @@
       const [x, y] = stack[stack.length - 1];
       const options = [];
 
-      for (const dir of DIRS) {
+      for (const dir of Object.values(DIRS)) {
         const nx = x + dir.dx;
         const ny = y + dir.dy;
         if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
@@ -78,42 +80,25 @@
     return grid;
   }
 
+  function setOverlay(visible, title, text) {
+    if (typeof title === "string") overlayTitleEl.textContent = title;
+    if (typeof text === "string") overlayTextEl.textContent = text;
+    overlayEl.classList.toggle("hidden", !visible);
+  }
+
   function setDifficulty(mode) {
     state.mode = mode;
     if (mode === "easy") {
       state.cols = 7;
       state.rows = 5;
-      statusEl.textContent = "아주 쉬운 미로예요. 왼쪽 스틱이나 방향키로 움직여서 별을 찾아가 보자.";
-      easyBtn.textContent = "보통으로 바꾸기";
+      easyBtn.textContent = "더 크게 보기";
+      statusEl.textContent = "쉬운 미로예요. 아래의 별까지 가 보자.";
     } else {
       state.cols = 9;
       state.rows = 7;
-      statusEl.textContent = "조금 더 큰 미로예요. A 버튼을 누르면 언제든 새 미로가 나와요.";
-      easyBtn.textContent = "더 쉽고 크게";
+      easyBtn.textContent = "보통으로 보기";
+      statusEl.textContent = "조금 더 큰 미로예요. 길을 찾아가 보자.";
     }
-    newMaze();
-  }
-
-  function showIntroOverlay() {
-    overlayEl.classList.remove("hidden");
-  }
-
-  function newMaze() {
-    state.maze = buildMaze(state.cols, state.rows);
-    state.player = { x: 0, y: 0 };
-    state.goal = { x: state.cols - 1, y: state.rows - 1 };
-    state.won = false;
-    state.winTime = 0;
-    state.confetti = [];
-    state.holdDir = null;
-    state.holdTimer = 0;
-    statusEl.textContent =
-      state.mode === "easy"
-        ? "출발! 초록색 나를 움직여서 오른쪽 아래의 별까지 가 보자."
-        : "새 미로가 생겼어요. 별까지 길을 찾아가 보자.";
-    overlayEl.classList.add("hidden");
-    resize();
-    draw();
   }
 
   function resize() {
@@ -127,21 +112,53 @@
     const usableW = Math.max(1, rect.width - padding * 2);
     const usableH = Math.max(1, rect.height - padding * 2);
     state.cellSize = Math.floor(Math.min(usableW / state.cols, usableH / state.rows));
-    state.cellSize = Math.max(52, Math.min(state.cellSize, 120));
+    state.cellSize = Math.max(48, Math.min(state.cellSize, 120));
   }
 
-  function movePlayer(dx, dy) {
-    if (state.won) return;
+  function resetMaze(showIntro = false) {
+    state.maze = buildMaze(state.cols, state.rows);
+    state.player = { x: 0, y: 0 };
+    state.goal = { x: state.cols - 1, y: state.rows - 1 };
+    state.won = false;
+    state.winTime = 0;
+    state.confetti = [];
+    state.lastMoveAt = 0;
+    resize();
+    if (showIntro) {
+      setOverlay(true, "준비 완료", "새 미로를 눌러 시작해요. 방향 버튼으로 이동할 수 있어요.");
+    } else {
+      setOverlay(false);
+    }
+    draw();
+  }
+
+  function movePlayer(dirName) {
+    const dir = DIRS[dirName];
+    if (!dir || state.won) return;
+
     const now = performance.now();
     if (now - state.lastMoveAt < 90) return;
 
     const cell = state.maze[state.player.y][state.player.x];
-    if (dx === 1 && !cell.e) state.player.x += 1;
-    if (dx === -1 && !cell.w) state.player.x -= 1;
-    if (dy === 1 && !cell.s) state.player.y += 1;
-    if (dy === -1 && !cell.n) state.player.y -= 1;
+    let moved = false;
+    if (dir.dx === 1 && !cell.e) {
+      state.player.x += 1;
+      moved = true;
+    } else if (dir.dx === -1 && !cell.w) {
+      state.player.x -= 1;
+      moved = true;
+    } else if (dir.dy === 1 && !cell.s) {
+      state.player.y += 1;
+      moved = true;
+    } else if (dir.dy === -1 && !cell.n) {
+      state.player.y -= 1;
+      moved = true;
+    }
 
+    if (!moved) return;
     state.lastMoveAt = now;
+    setOverlay(false);
+
     if (state.player.x === state.goal.x && state.player.y === state.goal.y) {
       winGame();
     }
@@ -150,13 +167,14 @@
   function winGame() {
     state.won = true;
     state.winTime = performance.now();
-    statusEl.textContent = "와! 별을 찾았어요! 새 미로로 한 번 더 해 볼까?";
+    statusEl.textContent = "성공! 별까지 도착했어요.";
+    setOverlay(true, "성공!", "다시 미로를 눌러 또 한 번 도전해요.");
     burstConfetti();
   }
 
   function burstConfetti() {
     const colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#ec4899"];
-    state.confetti = Array.from({ length: 100 }, () => ({
+    state.confetti = Array.from({ length: 80 }, () => ({
       x: Math.random() * canvas.clientWidth,
       y: -20 - Math.random() * 120,
       vx: -1.5 + Math.random() * 3,
@@ -164,21 +182,40 @@
       r: 3 + Math.random() * 5,
       rot: Math.random() * Math.PI,
       vr: -0.15 + Math.random() * 0.3,
-      color: colors[randInt(colors.length)]
+      color: colors[randInt(colors.length)],
     }));
+  }
+
+  function roundRect(x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + width, y, x + width, y + height, r);
+    ctx.arcTo(x + width, y + height, x, y + height, r);
+    ctx.arcTo(x, y + height, x, y, r);
+    ctx.arcTo(x, y, x + width, y, r);
+    ctx.closePath();
+  }
+
+  function drawBackground() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, "#fffaf0");
+    grad.addColorStop(1, "#fde68a");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
   }
 
   function drawMaze(offsetX, offsetY) {
     const s = state.cellSize;
-    const maze = state.maze;
-
     ctx.lineWidth = 8;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#8b5e34";
 
     for (let y = 0; y < state.rows; y++) {
       for (let x = 0; x < state.cols; x++) {
-        const cell = maze[y][x];
+        const cell = state.maze[y][x];
         const px = offsetX + x * s;
         const py = offsetY + y * s;
 
@@ -239,11 +276,6 @@
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.beginPath();
-    ctx.arc(0, 0, s * 0.08, 0, Math.PI * 2);
-    ctx.fill();
     ctx.restore();
   }
 
@@ -301,25 +333,6 @@
     state.confetti = state.confetti.filter((p) => p.y < canvas.clientHeight + 40);
   }
 
-  function drawBackground() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, "#fffaf0");
-    grad.addColorStop(1, "#fde68a");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.fillStyle = "rgba(255,255,255,0.25)";
-    for (let i = 0; i < 20; i++) {
-      const x = (i * 97 + (state.won ? performance.now() * 0.04 : 0)) % (w + 120) - 60;
-      const y = (i * 61) % h;
-      ctx.beginPath();
-      ctx.arc(x, y, 4 + (i % 3), 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
   function draw() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
@@ -332,30 +345,20 @@
     const offsetX = Math.round((w - boardW) / 2);
     const offsetY = Math.round((h - boardH) / 2);
 
-    ctx.save();
-    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-    ctx.fillRect(offsetX - 14, offsetY - 14, boardW + 28, boardH + 28);
-    ctx.restore();
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    roundRect(offsetX - 14, offsetY - 14, boardW + 28, boardH + 28, 20);
+    ctx.fill();
 
     drawMaze(offsetX, offsetY);
     drawGoal(offsetX, offsetY);
     drawPlayer(offsetX, offsetY);
     drawConfetti();
 
-    if (state.won) {
-      const elapsed = performance.now() - state.winTime;
-      if (elapsed > 2500) {
-        statusEl.textContent = "멋져요! 새 미로 버튼을 눌러 또 놀아 보자.";
-      }
-    }
-
     requestAnimationFrame(draw);
   }
 
-  function inputFromDirection(name) {
-    const dir = DIRS.find((d) => d.name === name);
-    if (!dir) return;
-    movePlayer(dir.dx, dir.dy);
+  function handleDirection(name) {
+    movePlayer(name);
   }
 
   function handleKeyDown(e) {
@@ -375,138 +378,78 @@
     };
 
     if (e.code === "Enter" || e.code === "Space") {
-      newMaze();
       e.preventDefault();
+      resetMaze(false);
       return;
     }
 
     const dir = map[e.key];
     if (dir) {
-      inputFromDirection(dir);
       e.preventDefault();
+      handleDirection(dir);
     }
   }
 
-  function handleMobilePress(button) {
-    const dir = button.dataset.dir;
-    const action = button.dataset.action;
-    if (dir) {
-      inputFromDirection(dir);
-      return;
-    }
-    if (action === "restart") {
-      newMaze();
-    }
+  function handleSwipeStart(point) {
+    state.swipeStart = { x: point.clientX, y: point.clientY };
   }
 
-  function bindMobileControls() {
-    for (const button of mobileButtons) {
-      button.addEventListener("click", () => handleMobilePress(button));
-      button.addEventListener(
-        "touchstart",
-        (e) => {
-          e.preventDefault();
-          handleMobilePress(button);
-        },
-        { passive: false }
-      );
-    }
+  function handleSwipeEnd(point) {
+    if (!state.swipeStart) return;
+    const dx = point.clientX - state.swipeStart.x;
+    const dy = point.clientY - state.swipeStart.y;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    state.swipeStart = null;
+    if (Math.max(absX, absY) < 26) return;
+    if (absX > absY) handleDirection(dx > 0 ? "right" : "left");
+    else handleDirection(dy > 0 ? "down" : "up");
+  }
+
+  function bindControls() {
+    newMazeBtn.addEventListener("click", () => {
+      resetMaze(false);
+    });
+
+    easyBtn.addEventListener("click", () => {
+      const nextMode = state.mode === "easy" ? "normal" : "easy";
+      setDifficulty(nextMode);
+      resetMaze(false);
+    });
 
     for (const button of mobileActionButtons) {
       button.addEventListener("click", () => {
         if (button.dataset.action === "restart") {
-          newMaze();
+          resetMaze(false);
         } else if (button.dataset.action === "difficulty") {
-          setDifficulty(state.mode === "easy" ? "normal" : "easy");
+          const nextMode = state.mode === "easy" ? "normal" : "easy";
+          setDifficulty(nextMode);
+          resetMaze(false);
         }
       });
     }
-  }
 
-  function setupSwipeControls() {
-    let startX = 0;
-    let startY = 0;
-    let active = false;
-
-    canvas.addEventListener("pointerdown", (e) => {
-      active = true;
-      startX = e.clientX;
-      startY = e.clientY;
-    });
-
-    canvas.addEventListener("pointerup", (e) => {
-      if (!active) return;
-      active = false;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      const absX = Math.abs(dx);
-      const absY = Math.abs(dy);
-      if (Math.max(absX, absY) < 28) return;
-      if (absX > absY) inputFromDirection(dx > 0 ? "right" : "left");
-      else inputFromDirection(dy > 0 ? "down" : "up");
-    });
-
-    canvas.addEventListener("pointercancel", () => {
-      active = false;
-    });
-  }
-
-  function pollGamepad() {
-    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-    const pad = pads && pads[0];
-    if (!pad) return;
-
-    const buttons = pad.buttons.map((b) => !!b.pressed);
-    const justPressed = (index) => buttons[index] && !state.lastPadButtons[index];
-
-    if (justPressed(0)) newMaze(); // A
-    if (justPressed(9)) newMaze(); // Start
-
-    const axisX = Math.abs(pad.axes[0] || 0) > 0.45 ? pad.axes[0] : 0;
-    const axisY = Math.abs(pad.axes[1] || 0) > 0.45 ? pad.axes[1] : 0;
-    let nextDir = null;
-
-    if (buttons[12] || axisY < 0) nextDir = "up";
-    else if (buttons[13] || axisY > 0) nextDir = "down";
-    else if (buttons[14] || axisX < 0) nextDir = "left";
-    else if (buttons[15] || axisX > 0) nextDir = "right";
-
-    const now = performance.now();
-    if (nextDir) {
-      if (state.holdDir !== nextDir) {
-        state.holdDir = nextDir;
-        state.holdTimer = now;
-        inputFromDirection(nextDir);
-      } else if (now - state.holdTimer > 180) {
-        state.holdTimer = now;
-        inputFromDirection(nextDir);
-      }
-    } else {
-      state.holdDir = null;
+    for (const button of dirButtons) {
+      button.addEventListener("click", () => handleDirection(button.dataset.dir));
+      button.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "touch" || e.pointerType === "pen") {
+          e.preventDefault();
+          handleDirection(button.dataset.dir);
+        }
+      });
     }
 
-    state.lastPadButtons = buttons;
+    window.addEventListener("keydown", handleKeyDown);
+    canvas.addEventListener("pointerdown", handleSwipeStart);
+    canvas.addEventListener("pointerup", handleSwipeEnd);
+    canvas.addEventListener("pointercancel", () => {
+      state.swipeStart = null;
+    });
+    window.addEventListener("resize", resize);
   }
-
-  function loopGamepad() {
-    pollGamepad();
-    requestAnimationFrame(loopGamepad);
-  }
-
-  window.addEventListener("resize", resize);
-  window.addEventListener("keydown", handleKeyDown);
-  newMazeBtn.addEventListener("click", newMaze);
-  easyBtn.addEventListener("click", () => {
-    setDifficulty(state.mode === "easy" ? "normal" : "easy");
-  });
-  bindMobileControls();
-  setupSwipeControls();
-  window.addEventListener("gamepadconnected", () => {
-    statusEl.textContent = "게임패드가 연결됐어요. 왼쪽 스틱이나 십자키로 움직여 보세요.";
-  });
 
   setDifficulty("easy");
-  showIntroOverlay();
+  bindControls();
+  resetMaze(true);
   requestAnimationFrame(draw);
-  requestAnimationFrame(loopGamepad);
 })();
