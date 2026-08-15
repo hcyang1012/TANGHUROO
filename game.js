@@ -1,7 +1,9 @@
 ﻿const machine = document.querySelector("#machine");
 const paymentModule = document.querySelector("#paymentModule");
 const cardButton = document.querySelector("#cardButton");
+const mobileCardButton = document.querySelector("#mobileCardButton");
 const powerSwitch = document.querySelector("#powerSwitch");
+const mobilePowerSwitch = document.querySelector("#mobilePowerSwitch");
 const powerLabel = document.querySelector("#powerLabel");
 const machineStatus = document.querySelector("#machineStatus");
 const selectedLabel = document.querySelector("#selectedLabel");
@@ -199,9 +201,13 @@ function updateIngredientState() {
 
 function updateCardButton() {
   const icon = '<svg><use href="#icon-card"></use></svg>';
-  cardButton.innerHTML = cardInserted
+  const markup = cardInserted
     ? `${icon}<span>카드 빼기</span>`
     : `${icon}<span>카드 넣기</span>`;
+  cardButton.innerHTML = markup;
+  if (mobileCardButton) {
+    mobileCardButton.innerHTML = markup;
+  }
 }
 
 function clearDispense() {
@@ -308,7 +314,17 @@ function updatePowerUI() {
   powerSwitch.classList.toggle("is-on", isOn);
   powerSwitch.setAttribute("aria-pressed", String(isOn));
   powerLabel.textContent = isOn ? "ON" : "OFF";
+  if (mobilePowerSwitch) {
+    mobilePowerSwitch.classList.toggle("is-on", isOn);
+    mobilePowerSwitch.setAttribute("aria-pressed", String(isOn));
+    mobilePowerSwitch.innerHTML = isOn
+      ? '<svg aria-hidden="true"><use href="#icon-power"></use></svg><span>ON</span>'
+      : '<svg aria-hidden="true"><use href="#icon-power"></use></svg><span>OFF</span>';
+  }
   cardButton.disabled = !isOn || isBusy;
+  if (mobileCardButton) {
+    mobileCardButton.disabled = !isOn || isBusy;
+  }
 
   if (!isOn) {
     isBusy = false;
@@ -522,6 +538,23 @@ cardButton.addEventListener("click", async () => {
     await ejectCardAndDispense();
   }
 });
+
+if (mobilePowerSwitch) {
+  mobilePowerSwitch.addEventListener("click", () => {
+    powerSwitch.click();
+  });
+}
+
+if (mobileCardButton) {
+  mobileCardButton.addEventListener("click", async () => {
+    if (!isOn || isBusy) return;
+    if (!cardInserted) {
+      await insertCard();
+    } else {
+      await ejectCardAndDispense();
+    }
+  });
+}
 
 selectedLabel.textContent = getSelectionLabel();
 renderPreview(selectedIngredients);

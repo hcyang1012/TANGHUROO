@@ -92,6 +92,24 @@
       </p>
     </section>
 
+    <div class="mobile-toolbar" aria-label="모바일 빠른 조작">
+      <div class="mobile-toolbar-label">
+        <svg aria-hidden="true"><use href="#icon-vending"></use></svg>
+        <span>모바일 조작</span>
+      </div>
+      <div class="mobile-toolbar-actions">
+        <button id="mobilePowerSwitch" class="mobile-action power" type="button" aria-pressed="false" aria-label="전원">
+          <svg aria-hidden="true"><use href="#icon-power"></use></svg>
+          <span>OFF</span>
+        </button>
+        <button id="mobileCardButton" class="mobile-action card" type="button">
+          <svg aria-hidden="true"><use href="#icon-card"></use></svg>
+          <span>카드 넣기</span>
+        </button>
+      </div>
+      <p class="mobile-toolbar-hint">카드와 전원은 여기서 바로 조작할 수 있어요.</p>
+    </div>
+
     <section class="studio-layout">
       <section class="machine-area" aria-label="탕후루 자판기">
         <div class="machine" id="machine" data-running="false">
