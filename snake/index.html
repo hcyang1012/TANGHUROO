@@ -10,9 +10,9 @@
   <main class="app">
     <section class="panel">
       <div class="eyebrow">1인용 스네이크</div>
-      <h1>먹이를 먹고, 꼬리를 길게!</h1>
+      <h1>먹이를 먹고, 더 길어지기!</h1>
       <p class="lede" id="message">
-        방향키나 WASD로 움직여요. 먹이를 먹으면 뱀이 길어지고, 벽이나 자기 몸에 부딪히면 끝나요.
+        방향키나 WASD로 움직여서 먹이를 먹고 길어지세요. 벽에 부딪히면 다시 시작해야 해요.
       </p>
 
       <div class="stats" aria-live="polite">
@@ -32,13 +32,13 @@
 
       <div class="actions">
         <button id="startBtn" type="button">시작 / 다시하기</button>
-        <button id="soundBtn" type="button" class="secondary">소리 켜기</button>
+        <button id="soundBtn" type="button" class="secondary">소리 끄기</button>
       </div>
 
       <div class="help">
         <div><b>조작</b> 방향키 / WASD</div>
         <div><b>목표</b> 먹이를 계속 먹기</div>
-        <div><b>팁</b> 너무 빨리 꺾으면 못 가요</div>
+        <div><b>팁</b> 너무 빨리 돌면 꼬리에 부딪혀요</div>
       </div>
     </section>
 
@@ -51,12 +51,12 @@
         </div>
       </div>
 
-      <div class="touch-controls" aria-label="터치 조작">
-        <button data-dir="up" class="pad top">▲</button>
+      <div class="touch-controls" aria-label="모바일 조작">
+        <button data-dir="up" class="pad top" aria-label="위로 이동">▲</button>
         <div class="pad-row">
-          <button data-dir="left" class="pad">◀</button>
-          <button data-dir="down" class="pad">▼</button>
-          <button data-dir="right" class="pad">▶</button>
+          <button data-dir="left" class="pad" aria-label="왼쪽으로 이동">◀</button>
+          <button data-dir="down" class="pad" aria-label="아래로 이동">▼</button>
+          <button data-dir="right" class="pad" aria-label="오른쪽으로 이동">▶</button>
         </div>
       </div>
     </section>
