@@ -5,6 +5,7 @@
   const newMazeBtn = document.getElementById("newMazeBtn");
   const easyBtn = document.getElementById("easyBtn");
   const mobileButtons = Array.from(document.querySelectorAll(".dir-btn"));
+  const mobileActionButtons = Array.from(document.querySelectorAll(".mobile-actions [data-action]"));
 
   const state = {
     cols: 7,
@@ -403,6 +404,16 @@
         },
         { passive: false }
       );
+    }
+
+    for (const button of mobileActionButtons) {
+      button.addEventListener("click", () => {
+        if (button.dataset.action === "restart") {
+          newMaze();
+        } else if (button.dataset.action === "difficulty") {
+          setDifficulty(state.mode === "easy" ? "normal" : "easy");
+        }
+      });
     }
   }
 
