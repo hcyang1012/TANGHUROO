@@ -2,6 +2,7 @@
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   const statusEl = document.getElementById("status");
+  const overlayEl = document.getElementById("overlay");
   const newMazeBtn = document.getElementById("newMazeBtn");
   const easyBtn = document.getElementById("easyBtn");
   const mobileButtons = Array.from(document.querySelectorAll(".dir-btn"));
@@ -106,6 +107,7 @@
       state.mode === "easy"
         ? "출발! 초록색 나를 움직여서 오른쪽 아래의 별까지 가 보자."
         : "새 미로가 생겼어요. 별까지 길을 찾아가 보자.";
+    overlayEl.classList.add("hidden");
     resize();
     draw();
   }
