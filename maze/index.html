@@ -8,6 +8,11 @@
 </head>
 <body>
   <main class="app">
+    <div class="mobile-toolbar" aria-label="모바일 빠른 조작">
+      <button type="button" data-action="restart">새 미로</button>
+      <button type="button" data-action="difficulty">크게 보기</button>
+    </div>
+
     <section class="hud" aria-live="polite">
       <div class="badge">미로 게임</div>
       <h1>별사탕 미로</h1>
@@ -23,11 +28,6 @@
         <div><b>모바일</b> 아래 패드 또는 스와이프</div>
       </div>
     </section>
-
-    <div class="mobile-dock" aria-label="모바일 빠른 조작">
-      <button type="button" data-action="restart">새 미로</button>
-      <button type="button" data-action="difficulty">크게 보기</button>
-    </div>
 
     <section class="stage">
       <div class="board-frame">
