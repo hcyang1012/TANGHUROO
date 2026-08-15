@@ -245,6 +245,17 @@ function animateSubscriberGain() {
   subscriberCount.textContent = subscribers.toLocaleString("en-US");
 }
 
+function scrollToBroadcastPanel() {
+  if (!window.matchMedia("(max-width: 640px)").matches) return;
+  if (!broadcastPanel) return;
+
+  const targetTop = Math.max(0, broadcastPanel.getBoundingClientRect().top + window.scrollY - 12);
+  window.scrollTo({
+    top: targetTop,
+    behavior: "smooth",
+  });
+}
+
 function renderVideoSnack(key) {
   videoSnack.replaceChildren();
   const snack = createTanghulu(getSelectionKeys(key));
@@ -268,6 +279,7 @@ async function playEatingSequence(key, token) {
   eatingToken = token;
   renderVideoSnack(selection);
   triggerEatingAnimation();
+  scrollToBroadcastPanel();
   animateSubscriberGain();
   addComment(review.comment || "한입 리액션!");
   updateBroadcastForIngredient(selection);
